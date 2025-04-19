@@ -13,7 +13,7 @@ namespace ObjIconImageExtractor
         public const string outputDirectory = @"C:\temp\sprites_output";
         public const string allBmpsOutputDirectory = @"C:\temp\all_bmps";
         public const string pathToDecompmdl = @"C:\Users\Bill\source\repos\obj_icon_image_extractor\ObjIconImageExtractor\decompmdl\";
-        public const string decompmdlFilename = @"decompmdl.exe";
+        public const string decompmdlFilename = @"decompmdl.exe";  // Source code and file download for this exe: https://github.com/Toodles2You/halflife-tools
         public const string decompmdlParameters = " \"{0}\" \"{1}\"";
 
         static void Main(string[] args)
@@ -25,7 +25,6 @@ namespace ObjIconImageExtractor
 
             foreach (string filePath in allObjIcons)
             {
-                // Create a subfolder for the map name
                 string parentFolder = Path.GetFileName(Path.GetDirectoryName(filePath));
                 string outputPathWithMapName = Path.Combine(outputDirectory, parentFolder);
                 Directory.CreateDirectory(outputPathWithMapName);
@@ -34,9 +33,7 @@ namespace ObjIconImageExtractor
                 {
                     StartInfo = new ProcessStartInfo
                     {
-                        // The original host website of RESGen.exe no longer appears to be up as of May 5, 2022, but I 
-                        // did find the source code for it on GitHub:
-                        // https://github.com/kriswema/resgen
+                        // Source code and file download for this exe: https://github.com/Toodles2You/halflife-tools
                         FileName = Path.Combine(pathToDecompmdl, decompmdlFilename),
                         Arguments = String.Format(decompmdlParameters, filePath, outputPathWithMapName),
                         UseShellExecute = false,
@@ -63,7 +60,7 @@ namespace ObjIconImageExtractor
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Error starting decompmdl.exe");
+                    Console.WriteLine("Error starting decompmdl.exe: ", ex.Message);
                     break;
                 }
             }
@@ -73,7 +70,7 @@ namespace ObjIconImageExtractor
 
             foreach (string filePath in bmpFiles)
             {
-                // Walk back up 3 parent directories
+                // Walk back up 3 parent directories to get map name
                 DirectoryInfo fileDir = new FileInfo(filePath).Directory;
                 string prefix = "";
 
@@ -85,12 +82,11 @@ namespace ObjIconImageExtractor
 
                 string originalFileName = Path.GetFileName(filePath);
 
-                // Create new file name with parent folder prefix
+                // Create new file name with map name or folder as a prefix (some maps put their icons right in obj_icons instead of a sub-folder)
                 string newFileName = $"{prefix}_{originalFileName}";
                 string destinationPath = Path.Combine(allBmpsOutputDirectory, newFileName);
 
                 File.Copy(filePath, destinationPath, overwrite: true);
-                Console.WriteLine($"Copied: {filePath} -> {destinationPath}");
             }
         }
     }
